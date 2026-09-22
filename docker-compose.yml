@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Docker/Server/Dockerfile
+    container_name: pbl_server
+    ports:
+      - "6742:6742"
+    networks:
+      - pbl_network
+
+  client:
+    build:
+      context: .
+      dockerfile: Docker/Client/Dockerfile
+    container_name: pbl_client
+    stdin_open: true # Habilita entrada via terminal (stdin)
+    tty: true        # Habilita suporte a TTY/Terminal
+    # Se SERVER_IP não for definido, usa 'server' (comunicação interna do docker)
+    command: ["./client", "-addr", "${SERVER_IP:-server}:6742"]
+    depends_on:
+      - server
+    networks:
+      - pbl_network
+
+networks:
+  pbl_network:
+    driver: bridge
